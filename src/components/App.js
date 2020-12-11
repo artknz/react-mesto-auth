@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -6,6 +7,9 @@ import ImagePopup from './ImagePopup';
 import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
+import Register from './Register';
+import Login from './Login';
+import ProtectedRoute from './ProtectedRoute';
 import {api} from '../utils/api.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 
@@ -89,11 +93,58 @@ export default function App() {
     )
   }, []);
 
+  // function handleLogin (data) {
+  //   auth.login({
+  //     password: data.password,
+  //     email: data.email
+  //   })
+  //   .then((res) => {
+  //     localStorage.setItem('jwt', res.token);
+  //     setLoggedIn(true);
+  //     history.push('/')
+  //   })
+  //   .catch((err) => console.log(err))
+  // }
+
+  // React.useEffect(() => {
+  //   const jwt = localStorage.getItem('jwt');
+  //   if (jwt) {
+  //     auth.getToken()
+  //       .then((res) => {
+  //         res.data ? setLoggedIn(true) : setLoggedIn(false);
+  //         setEmail(res.data.email);
+  //         history.push('/');
+  //       })
+  //       .catch(err => console.log(err));
+  //   }
+  // }, []);
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
       <Header />
-      <Main
+      <Switch>
+        <ProtectedRoute exact path="/"
+          onEditProfile={handleEditProfileClick}
+          onAddPlace={handleAddPlaceClick}
+          onEditAvatar={handleEditAvatarClick}
+          onCardClick={setSelectedCard}
+          cards={cards}
+          onCardLike={handleCardLike}
+          onCardDelete={handleCardDelete}
+        />
+        <Route path="/signup">
+          <div className="registerContainer">
+            <Register />
+          </div>
+        </Route>
+        <Route path="/signin">
+          <div className="loginContainer">
+            <Login />
+          </div>
+        </Route>
+      </Switch>
+      {/* <Main
         onEditProfile={handleEditProfileClick}
         onAddPlace={handleAddPlaceClick}
         onEditAvatar={handleEditAvatarClick}
@@ -101,8 +152,10 @@ export default function App() {
         cards={cards}
         onCardLike={handleCardLike}
         onCardDelete={handleCardDelete}
-      />
-      <Footer />
+      /> */}
+      <Route path="/" exact>
+        <Footer />
+      </Route>
 
       <EditAvatarPopup
         isOpen={isEditAvatarPopupOpen}
@@ -126,7 +179,7 @@ export default function App() {
         card={selectedCard}
         onClose={closeAllPopups}
       />
-    </div>
+      </div>
     </CurrentUserContext.Provider>
   );
 }

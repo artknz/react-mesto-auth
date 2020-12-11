@@ -1,8 +1,8 @@
 @import url(./__logo/header__logo.css);
+@import url(./__register/header__register.css);
+@import url(./__container/header__container.css);
 
 .header {
-  display: flex;
-  flex-direction: column;
   max-width: 882px;
   width: 100%;
   margin: 0 auto;
