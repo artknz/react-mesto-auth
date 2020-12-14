@@ -16,12 +16,12 @@ import * as auth from './Auth';
 
 
 const App = () => {
-  const[isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
-  const[isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
-  const[isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
-  const[selectedCard, setSelectedCard] = React.useState(null);
-  const[currentUser, setCurrentUser] = React.useState(CurrentUserContext);
-  const[cards, setCards] = React.useState([]);
+  const[isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const[isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
+  const[isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+  const[selectedCard, setSelectedCard] = useState(null);
+  const[currentUser, setCurrentUser] = useState(CurrentUserContext);
+  const[cards, setCards] = useState([]);
 
   const[ loggedIn, setLoggedIn ] = React.useState(false);
   const[ userData, setUserData ] = React.useState({
@@ -29,6 +29,10 @@ const App = () => {
     password: ''
   });
   const history = useHistory();
+
+  useEffect(_ => {
+    tokenCheck()
+  }, [])
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -102,7 +106,7 @@ const App = () => {
   }, []);
 
   const handleResponse = (data) => {
-    localStorage.setItem('jwt', data.jwt);
+    localStorage.setItem('jwt', data.token);
     setUserData({
       email: data.email,
       password: data.password
@@ -123,19 +127,6 @@ const App = () => {
       .catch(err => console.log(err))
   }
 
-  // React.useEffect(() => {
-  //   const jwt = localStorage.getItem('jwt');
-  //   if (jwt) {
-  //     auth.getContent(jwt)
-  //       .then((res) => {
-  //         res.data ? setLoggedIn(true) : setLoggedIn(false);
-  //         setUserData(res.data.email);
-  //         history.push('/');
-  //       })
-  //       .catch(err => console.log(err));
-  //   }
-  // }, []);
-
   // const handleLogout = () => {
   //   const jwt = localStorage.removeItem('jwt')
   //   setUserData({
@@ -144,30 +135,63 @@ const App = () => {
   //   setLoggedIn(false)
   // }
 
+  // useEffect(() => {
+  //   const jwt = localStorage.getItem('jwt');
+  //   if (jwt) {
+  //     auth.getContent()
+  //       .then((res) => {
+  //         console.log(res)
+  //         // res.data ? setLoggedIn(true) : setLoggedIn(false);
+  //         // setUserData(res.data.email);
+  //         // history.push('/');
+  //       })
+  //       .catch(err => console.log(err));
+  //   }
+  // }, [])
+
+  const tokenCheck = () => {
+    const jwt = localStorage.getItem('jwt')
+    if (jwt) {
+      auth.getContent(jwt).then((res) => {
+        if (res.email) {
+          setUserData({
+            email: res.email,
+            password: res.password
+          });
+          setLoggedIn(true);
+          history.push('/');
+        }
+      })
+      .catch(err => console.log(err))
+    }
+  }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
       <Header />
       <Switch>
-        <ProtectedRoute exact path="/" loggedIn={loggedIn} component={Main}>
-          <Main
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onEditAvatar={handleEditAvatarClick}
-            onCardClick={setSelectedCard}
-            cards={cards}
-            onCardLike={handleCardLike}
-            onCardDelete={handleCardDelete}
-          />
-        </ProtectedRoute>
+        <ProtectedRoute
+          exact
+          path="/"
+          loggedIn={loggedIn}
+          component={Main}
+          onEditProfile={handleEditProfileClick}
+          onAddPlace={handleAddPlaceClick}
+          onEditAvatar={handleEditAvatarClick}
+          onCardClick={setSelectedCard}
+          cards={cards}
+          onCardLike={handleCardLike}
+          onCardDelete={handleCardDelete}
+        />
         <Route path="/signup">
           <div className="registerContainer">
             <Register handleRegister={handleRegister} />
           </div>
         </Route>
         <Route path="/signin">
-          <div handleLogin={handleLogin} className="loginContainer">
-            <Login />
+          <div className="loginContainer">
+            <Login handleLogin={handleLogin} tokenCheck={tokenCheck} />
           </div>
         </Route>
         <Route>
