@@ -105,25 +105,31 @@ const App = () => {
     )
   }, []);
 
-  const handleResponse = (data) => {
-    localStorage.setItem('jwt', data.token);
-    setUserData({
-      email: data.email,
-      password: data.password
-    });
-    setLoggedIn(true);
-    history.push('/');
-  }
-
   const handleLogin = (email, password) => {
     auth.authorize(email, password)
-      .then(handleResponse)
-      .catch((err) => console.log(err))
+    .then(data => {
+      localStorage.setItem('jwt', data.token)
+      console.log(data.token)
+      setUserData({
+        email: data.email,
+        password: data.password
+      });
+      setLoggedIn(true);
+      history.push('/');
+    })
+    .catch((err) => console.log(err))
   }
 
   const handleRegister = (email, password) => {
     auth.register(email, password)
-      .then(handleResponse)
+      .then(data => {
+        setUserData({
+          email: data.email,
+          password: data.password
+        });
+        setLoggedIn(true);
+        history.push('/');
+      })
       .catch(err => console.log(err))
   }
 
@@ -135,28 +141,15 @@ const App = () => {
   //   setLoggedIn(false)
   // }
 
-  // useEffect(() => {
-  //   const jwt = localStorage.getItem('jwt');
-  //   if (jwt) {
-  //     auth.getContent()
-  //       .then((res) => {
-  //         console.log(res)
-  //         // res.data ? setLoggedIn(true) : setLoggedIn(false);
-  //         // setUserData(res.data.email);
-  //         // history.push('/');
-  //       })
-  //       .catch(err => console.log(err));
-  //   }
-  // }, [])
-
   const tokenCheck = () => {
     const jwt = localStorage.getItem('jwt')
+    console.log(jwt)
     if (jwt) {
       auth.getContent(jwt).then((res) => {
-        if (res.email) {
+        console.log(res)
+        if (res.data.email) {
           setUserData({
-            email: res.email,
-            password: res.password
+            email: res.data.email,
           });
           setLoggedIn(true);
           history.push('/');

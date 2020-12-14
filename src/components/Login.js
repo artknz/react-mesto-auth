@@ -22,10 +22,10 @@ const Login = ({ handleLogin }) => {
   }
 
   return(
-    <div onSubmit={handleSubmit} className="auth">
+    <div className="auth">
       <p className="auth__welcome">Вход</p>
       {/* <p className="auth__error">{data.message}</p> */}
-      <form className="auth__form">
+      <form className="auth__form" onSubmit={handleSubmit}>
         <input id="username" required name="email" placeholder="Email" type="text" value={data.username} onChange={handleChange} />
         <input id="password" required name="password" placeholder="Пароль" type="password" value={data.password} onChange={handleChange} />
         <div className="auth__button-container">
