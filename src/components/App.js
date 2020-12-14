@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -12,15 +12,23 @@ import Login from './Login';
 import ProtectedRoute from './ProtectedRoute';
 import {api} from '../utils/api.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import * as auth from './Auth';
 
 
-export default function App() {
+const App = () => {
   const[isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
   const[isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
   const[isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
   const[selectedCard, setSelectedCard] = React.useState(null);
   const[currentUser, setCurrentUser] = React.useState(CurrentUserContext);
   const[cards, setCards] = React.useState([]);
+
+  const[ loggedIn, setLoggedIn ] = React.useState(false);
+  const[ userData, setUserData ] = React.useState({
+    email: '',
+    password: ''
+  });
+  const history = useHistory();
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -93,55 +101,77 @@ export default function App() {
     )
   }, []);
 
-  // function handleLogin (data) {
-  //   auth.login({
-  //     password: data.password,
-  //     email: data.email
-  //   })
-  //   .then((res) => {
-  //     localStorage.setItem('jwt', res.token);
-  //     setLoggedIn(true);
-  //     history.push('/')
-  //   })
-  //   .catch((err) => console.log(err))
-  // }
+  const handleResponse = (data) => {
+    localStorage.setItem('jwt', data.jwt);
+    setUserData({
+      email: data.email,
+      password: data.password
+    });
+    setLoggedIn(true);
+    history.push('/');
+  }
+
+  const handleLogin = (email, password) => {
+    auth.authorize(email, password)
+      .then(handleResponse)
+      .catch((err) => console.log(err))
+  }
+
+  const handleRegister = (email, password) => {
+    auth.register(email, password)
+      .then(handleResponse)
+      .catch(err => console.log(err))
+  }
 
   // React.useEffect(() => {
   //   const jwt = localStorage.getItem('jwt');
   //   if (jwt) {
-  //     auth.getToken()
+  //     auth.getContent(jwt)
   //       .then((res) => {
   //         res.data ? setLoggedIn(true) : setLoggedIn(false);
-  //         setEmail(res.data.email);
+  //         setUserData(res.data.email);
   //         history.push('/');
   //       })
   //       .catch(err => console.log(err));
   //   }
   // }, []);
 
+  // const handleLogout = () => {
+  //   const jwt = localStorage.removeItem('jwt')
+  //   setUserData({
+  //     email: ''
+  //   });
+  //   setLoggedIn(false)
+  // }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
       <Header />
       <Switch>
-        <ProtectedRoute exact path="/"
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          onCardClick={setSelectedCard}
-          cards={cards}
-          onCardLike={handleCardLike}
-          onCardDelete={handleCardDelete}
-        />
+        <ProtectedRoute exact path="/" loggedIn={loggedIn} component={Main}>
+          <Main
+            onEditProfile={handleEditProfileClick}
+            onAddPlace={handleAddPlaceClick}
+            onEditAvatar={handleEditAvatarClick}
+            onCardClick={setSelectedCard}
+            cards={cards}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+          />
+        </ProtectedRoute>
         <Route path="/signup">
           <div className="registerContainer">
-            <Register />
+            <Register handleRegister={handleRegister} />
           </div>
         </Route>
         <Route path="/signin">
-          <div className="loginContainer">
+          <div handleLogin={handleLogin} className="loginContainer">
             <Login />
           </div>
+        </Route>
+        <Route>
+          {loggedIn ? <Redirect to="/" /> : <Redirect to="/signin" />}
         </Route>
       </Switch>
       {/* <Main
@@ -183,3 +213,5 @@ export default function App() {
     </CurrentUserContext.Provider>
   );
 }
+
+export default App;
