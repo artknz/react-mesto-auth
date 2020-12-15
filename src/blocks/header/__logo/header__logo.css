@@ -3,6 +3,7 @@
   min-height: 33.4px;
   width: 100%;
   margin-bottom: 40.6px;
+  margin-right: auto;
 }
 
 @media screen and (max-width: 885px) {

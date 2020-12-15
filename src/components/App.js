@@ -23,8 +23,8 @@ const App = () => {
   const[currentUser, setCurrentUser] = useState(CurrentUserContext);
   const[cards, setCards] = useState([]);
 
-  const[ loggedIn, setLoggedIn ] = React.useState(false);
-  const[ userData, setUserData ] = React.useState({
+  const[ loggedIn, setLoggedIn ] = useState(false);
+  const[ userData, setUserData ] = useState({
     email: '',
     password: ''
   });
@@ -109,7 +109,6 @@ const App = () => {
     auth.authorize(email, password)
     .then(data => {
       localStorage.setItem('jwt', data.token)
-      console.log(data.token)
       setUserData({
         email: data.email,
         password: data.password
@@ -133,20 +132,10 @@ const App = () => {
       .catch(err => console.log(err))
   }
 
-  // const handleLogout = () => {
-  //   const jwt = localStorage.removeItem('jwt')
-  //   setUserData({
-  //     email: ''
-  //   });
-  //   setLoggedIn(false)
-  // }
-
   const tokenCheck = () => {
     const jwt = localStorage.getItem('jwt')
-    console.log(jwt)
     if (jwt) {
       auth.getContent(jwt).then((res) => {
-        console.log(res)
         if (res.data.email) {
           setUserData({
             email: res.data.email,
@@ -159,10 +148,21 @@ const App = () => {
     }
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('jwt')
+    setUserData({
+      email: ''
+    });
+    setLoggedIn(false)
+  }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-      <Header />
+      <Header
+        userData={userData}
+        handleLogout={handleLogout}
+      />
       <Switch>
         <ProtectedRoute
           exact
