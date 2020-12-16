@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 const Register = ({ handleRegister }) => {
   const [ data, setData ] = useState({
     email: '',
-    password: ''
+    password: '',
+    message: ''
   })
 
   const handleChange = (e) => {
@@ -23,7 +24,6 @@ const Register = ({ handleRegister }) => {
   return(
     <div onSubmit={handleSubmit} className="auth">
       <p className="auth__welcome">Регистрация</p>
-      {/* <p className="auth__error">{data.message}</p> */}
       <form className="auth__form">
         <input id="username" required name="email" placeholder="Email" type="text" value={data.username} onChange={handleChange} />
         <input id="password" required name="password" placeholder="Пароль" type="password" value={data.password} onChange={handleChange} />

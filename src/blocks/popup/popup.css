@@ -11,6 +11,9 @@
 @import url(./__field-error/_active/popup__field-error_active.css);
 @import url(./__save/_inactive/popup__save_inactive.css);
 @import url(./__save/_type/popup__save_type_delete.css);
+@import url(./__image-response/popup__image-response.css);
+@import url(./__text-response/popup__text-response.css);
+@import url(./__container/_type_message/popup__container_type_message.css);
 
 .popup {
   position: fixed;

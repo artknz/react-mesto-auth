@@ -7,6 +7,7 @@ import ImagePopup from './ImagePopup';
 import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
+import InfoToolTip from './InfoTooltip';
 import Register from './Register';
 import Login from './Login';
 import ProtectedRoute from './ProtectedRoute';
@@ -14,11 +15,12 @@ import {api} from '../utils/api.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 import * as auth from './Auth';
 
-
 const App = () => {
   const[isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const[isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const[isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+  const[isInfoToolTipOpen, setInfoToolTipOpen] = useState(false);
+
   const[selectedCard, setSelectedCard] = useState(null);
   const[currentUser, setCurrentUser] = useState(CurrentUserContext);
   const[cards, setCards] = useState([]);
@@ -26,8 +28,9 @@ const App = () => {
   const[ loggedIn, setLoggedIn ] = useState(false);
   const[ userData, setUserData ] = useState({
     email: '',
-    password: ''
+    password: '',
   });
+  const[ statusResponse, setStatusResponse ] = useState()
   const history = useHistory();
 
   useEffect(_ => {
@@ -87,6 +90,7 @@ const App = () => {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
+    setInfoToolTipOpen(false);
     setSelectedCard(null);
   }
 
@@ -127,9 +131,17 @@ const App = () => {
           password: data.password
         });
         setLoggedIn(true);
-        history.push('/');
+        history.push('/signin');
       })
-      .catch(err => console.log(err))
+      .then(res => {
+        setStatusResponse(true)
+        setInfoToolTipOpen(true);
+      })
+      .catch(err => {
+        console.log(err)
+        setStatusResponse(false)
+        setInfoToolTipOpen(true);
+      })
   }
 
   const tokenCheck = () => {
@@ -187,19 +199,10 @@ const App = () => {
             <Login handleLogin={handleLogin} tokenCheck={tokenCheck} />
           </div>
         </Route>
-        <Route>
+        <Route path="/" exact>
           {loggedIn ? <Redirect to="/" /> : <Redirect to="/signin" />}
         </Route>
       </Switch>
-      {/* <Main
-        onEditProfile={handleEditProfileClick}
-        onAddPlace={handleAddPlaceClick}
-        onEditAvatar={handleEditAvatarClick}
-        onCardClick={setSelectedCard}
-        cards={cards}
-        onCardLike={handleCardLike}
-        onCardDelete={handleCardDelete}
-      /> */}
       <Route path="/" exact>
         <Footer />
       </Route>
@@ -225,6 +228,12 @@ const App = () => {
       <ImagePopup
         card={selectedCard}
         onClose={closeAllPopups}
+      />
+
+      <InfoToolTip
+        isOpen={isInfoToolTipOpen}
+        onClose={closeAllPopups}
+        statusResponse={statusResponse}
       />
       </div>
     </CurrentUserContext.Provider>
