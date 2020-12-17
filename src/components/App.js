@@ -13,7 +13,7 @@ import Login from './Login';
 import ProtectedRoute from './ProtectedRoute';
 import {api} from '../utils/api.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
-import * as auth from './Auth';
+import * as auth from '../utils/Auth';
 
 const App = () => {
   const[isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
@@ -27,8 +27,7 @@ const App = () => {
 
   const[ loggedIn, setLoggedIn ] = useState(false);
   const[ userData, setUserData ] = useState({
-    email: '',
-    password: '',
+    email: ''
   });
   const[ statusResponse, setStatusResponse ] = useState()
   const history = useHistory();
@@ -53,14 +52,16 @@ const App = () => {
     api.editUserInfo(data).then((data) => {
       setCurrentUser(data)
       closeAllPopups()
-    });
+    })
+    .catch((err) => console.log(err))
   }
 
   function handleUpdateAvatar(data) {
     api.editUserAvatar(data).then((data) => {
       setCurrentUser(data)
       closeAllPopups()
-    });
+    })
+    .catch((err) => console.log(err))
   }
 
   function handleCardLike(card) {
@@ -69,14 +70,16 @@ const App = () => {
     api.changeLikeCardStatus(card._id, !isLiked).then((newCard) => {
       const newCards = cards.map((c) => c._id === card._id ? newCard : c);
       setCards(newCards);
-    });
+    })
+    .catch((err) => console.log(err))
   }
 
   function handleCardDelete(card) {
     api.deleteCard(card._id).then(() => {
       const newCards = cards.filter((c) => c._id !== card._id)
       setCards(newCards);
-    });
+    })
+    .catch((err) => console.log(err))
   }
 
   function handleAddPlaceSubmit(newCard) {
@@ -84,6 +87,7 @@ const App = () => {
       setCards([newCard, ...cards]);
       closeAllPopups()
     })
+    .catch((err) => console.log(err))
   }
 
   function closeAllPopups() {
@@ -94,29 +98,32 @@ const App = () => {
     setSelectedCard(null);
   }
 
-  React.useEffect(() => {
-    api.getUserInfo()
-    .then(data => {
-      setCurrentUser(data)
-    })
-  }, []);
+  useEffect(() => {
+    if (loggedIn) {
+      api.getUserInfo()
+      .then(data => {
+        console.log(data)
+        setCurrentUser(data)
+        setUserData({
+          email: data.email
+        })
+      })
+      .catch((err) => console.log(err))
+    }
+  }, [loggedIn]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     api.getInitialCards().then(
       (item) => {
         setCards(item);
-      }
-    )
+      })
+      .catch((err) => console.log(err))
   }, []);
 
   const handleLogin = (email, password) => {
     auth.authorize(email, password)
     .then(data => {
       localStorage.setItem('jwt', data.token)
-      setUserData({
-        email: data.email,
-        password: data.password
-      });
       setLoggedIn(true);
       history.push('/');
     })
@@ -130,7 +137,6 @@ const App = () => {
           email: data.email,
           password: data.password
         });
-        setLoggedIn(true);
         history.push('/signin');
       })
       .then(res => {
@@ -172,7 +178,7 @@ const App = () => {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
       <Header
-        userData={userData}
+        loggedIn={loggedIn}
         handleLogout={handleLogout}
       />
       <Switch>

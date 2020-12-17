@@ -13,6 +13,7 @@ export default class Api {
 
   getInitialCards() {
     return fetch(`${this.baseUrl}/cards`, {
+      method: 'GET',
       headers: this.headers
     })
     .then(this._statusResponse);
@@ -48,6 +49,7 @@ export default class Api {
 
   getUserInfo() {
     return fetch(`${this.baseUrl}/users/me`, {
+      method: 'GET',
       headers: this.headers
     })
     .then(this._statusResponse);
