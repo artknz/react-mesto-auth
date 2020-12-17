@@ -100,25 +100,28 @@ const App = () => {
 
   useEffect(() => {
     if (loggedIn) {
+      const jwt = localStorage.getItem('jwt')
       api.getUserInfo()
-      .then(data => {
-        console.log(data)
-        setCurrentUser(data)
-        setUserData({
-          email: data.email
+        .then(data => {
+          setCurrentUser(data)
         })
+        .catch((err) => console.log(err))
+
+      api.getInitialCards().then(
+        (item) => {
+          setCards(item);
+        })
+        .catch((err) => console.log(err))
+
+      auth.getContent(jwt).then((res) => {
+        console.log(res.data.email)
+        setUserData({
+          email: res.data.email,
+        });
       })
-      .catch((err) => console.log(err))
+      .catch(err => console.log(err))
     }
   }, [loggedIn]);
-
-  useEffect(() => {
-    api.getInitialCards().then(
-      (item) => {
-        setCards(item);
-      })
-      .catch((err) => console.log(err))
-  }, []);
 
   const handleLogin = (email, password) => {
     auth.authorize(email, password)
@@ -155,9 +158,6 @@ const App = () => {
     if (jwt) {
       auth.getContent(jwt).then((res) => {
         if (res.data.email) {
-          setUserData({
-            email: res.data.email,
-          });
           setLoggedIn(true);
           history.push('/');
         }
@@ -178,7 +178,7 @@ const App = () => {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
       <Header
-        loggedIn={loggedIn}
+        userData={userData}
         handleLogout={handleLogout}
       />
       <Switch>
