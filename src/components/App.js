@@ -114,7 +114,6 @@ const App = () => {
         .catch((err) => console.log(err))
 
       auth.getContent(jwt).then((res) => {
-        console.log(res.data.email)
         setUserData({
           email: res.data.email,
         });
